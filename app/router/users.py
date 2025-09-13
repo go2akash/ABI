@@ -13,7 +13,7 @@ router = APIRouter()
 @router.post("/create", response_model=UserWithAccountResponse)
 def register_user(db:Annotated[Session,Depends(get_db)],user:UserCreate):
     user_service = UserService(db)
-    new_user = user_service.create_user(user,return_account=True)
+    new_user = user_service.create_user(user)
     return new_user    
 
 

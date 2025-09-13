@@ -7,10 +7,8 @@ from app.schemas.admin import (
     AdminShow, 
     AdminLogin,
     UserDetailResponse,
-    #AccountDetailResponse, 
-    #TransactionDetailResponse
 )
-from app.schemas.users import UserCreate, UserResponse, UserWithAccountResponse
+from app.schemas.users import UserCreate, UserWithAccountResponse
 from app.services.admin_service import AdminService
 from app.auth.admin import get_current_admin, create_admin_token, authenticate_admin
 from app.schemas.token import AdminToken
@@ -85,7 +83,7 @@ def create_user_as_admin(
     Create a new user account (admin privilege)
     """
     service = AdminService(db)
-    return service.create_user(user_data,return_account=True)
+    return service.create_user(user_data)
 '''
 # 💳 TRANSACTION MANAGEMENT
 @router.get("/transactions", response_model=List[TransactionDetailResponse])
