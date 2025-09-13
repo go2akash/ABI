@@ -13,7 +13,7 @@ class UserService:
         self.db = db
         self.account_service = AccountService(db)
 
-    def create_user(self, user: UserCreate, return_account: bool = False):
+    def create_user(self, user: UserCreate):
         if self.db.query(User).filter((User.username == user.username) | (User.email == user.email)).first():
             raise HTTPException(status_code=409, detail="Username or email already exists")
 

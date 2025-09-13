@@ -43,4 +43,4 @@ class AdminService:
     
     def create_user(self, user_data):
         user_service = UserService(self.db)
-        return user_service.create_user(user_data, return_account=True)
+        return user_service.create_user(user_data)

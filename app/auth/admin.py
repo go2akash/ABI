@@ -1,6 +1,4 @@
 from datetime import UTC, datetime, timedelta, timezone
-from enum import auto
-from re import A
 from typing import Annotated
 from fastapi import Depends, HTTPException,status
 import jwt
@@ -9,11 +7,12 @@ import os
 from uuid import UUID
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.functions import user
 from sqlalchemy.util import deprecated
 
-from app.auth.users import ALGORITHM, SECRET_KEY
+from app.auth.users import ALGORITHM 
 from dotenv import load_dotenv
 
 from app.db.base import get_db
@@ -24,8 +23,8 @@ from app.models.admin import Admin
 load_dotenv()
 
 
-SECRET_KEY=os.getenv("ADMIN_SECRATE_KEY")
-if not SECRET_KEY:
+ADMIN_SECRET_KEY=os.getenv("ADMIN_SECRATE_KEY")
+if not ADMIN_SECRET_KEY:
     raise HTTPException(status_code=404,detail="Missing secrate key")
 ALGORITHM="HS256"
 ADMIN_ACCESS_TOKEN_EXPIRE=timedelta(hours=6)
@@ -43,7 +42,9 @@ def verify_admin_password(password:str,hash_password:str):
 
 
 def get_admin(db:Session,username:str |None,email:str|None):
-    admin=db.query(Admin).filter(Admin.username==username or Admin.email==email).first()
+    if not username and not email:
+        return None
+    admin=db.query(Admin).filter(or_(Admin.username==username,Admin.email==email)).first()
     return admin
 
 
@@ -65,7 +66,7 @@ def create_admin_token(*,admin_id:UUID,expireDelta:timedelta | None=None):
         "sub":str(admin_id),
         "iat":now,
     }
-    return jwt.encode(payload,key=SECRET_KEY,algorithm=ALGORITHM)
+    return jwt.encode(payload,key=ADMIN_SECRET_KEY,algorithm=ALGORITHM)
 
 
 def get_admin_by_adminid(db:Session,admin_id:UUID):
@@ -80,7 +81,7 @@ def get_current_admin(token: Annotated[str, Depends(admin_oauth2_schema)], db: A
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, ADMIN_SECRET_KEY, algorithms=[ALGORITHM])
         admin_id_in_str = payload.get("sub")
         if admin_id_in_str is None:
             raise credentials_exception

@@ -1,6 +1,6 @@
 from uuid import UUID
-from pydantic import BaseModel, EmailStr,ConfigDict
-
+from pydantic import BaseModel, EmailStr,ConfigDict,model_validator
+from typing import Optional
 
 
 class AdminCreate(BaseModel):
@@ -17,10 +17,14 @@ class AdminShow(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class AdminLogin(BaseModel):
-    username:str
-    email:EmailStr
-    password:str
-
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: str
+    @model_validator(mode='after')
+    def check_username_or_email(self):
+        if not self.username and not self.email:
+            raise ValueError('Either username or email must be provided')
+        return self
 
 
 class UserDetailResponse(BaseModel):
