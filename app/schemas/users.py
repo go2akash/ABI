@@ -36,3 +36,18 @@ class UserLogin(BaseModel):
     email: Optional[EmailStr]=None
     username: Optional[str]=None
     password: str
+
+
+class UserWithAccountResponse(BaseModel):
+    id: UUID
+    username: str
+    email: EmailStr
+    full_name: str
+    is_active: bool
+    created_at: Optional[datetime]
+    updated_at: Optional[datetime]
+    account_number: int
+    account_type: str
+    balance: float
+
+    model_config = ConfigDict(from_attributes=True)

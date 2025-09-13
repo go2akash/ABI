@@ -25,12 +25,15 @@ class AdminLogin(BaseModel):
 
 class UserDetailResponse(BaseModel):
     id: UUID
-    name: str
+    full_name: str
     email: EmailStr
     username: str
     is_active: bool
 
     model_config = ConfigDict(from_attributes=True)
+
+
+
 
 #UserDetailResponse,
 #AccountDetailResponse, 

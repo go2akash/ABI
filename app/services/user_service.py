@@ -4,7 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from fastapi import HTTPException
 from app.models.users import User
 from app.auth.users import get_password_hash
-from app.schemas.users import UserCreate, UserResponse
+from app.schemas.users import UserCreate, UserResponse, UserWithAccountResponse
 from .account_service import AccountService
 
 
@@ -39,19 +39,19 @@ class UserService:
 
             self.db.commit()
             self.db.refresh(new_user)
-
-            # Return only user or user + account
-            if return_account:
-                return {
-                    "user": UserResponse.model_validate(new_user),
-                    "account": {
-                        "account_number": account.account_number,
-                        "account_type": account.account_type,
-                        "balance": account.balance
-                    }
-                }
-
-            return UserResponse.model_validate(new_user)
+            
+            return UserWithAccountResponse(
+                id=new_user.id,
+                username=new_user.username,
+                email=new_user.email,
+                full_name=new_user.full_name,
+                is_active=new_user.is_active,
+                created_at=new_user.created_at,
+                updated_at=new_user.updated_at,
+                account_number=account.account_number,
+                account_type=account.account_type,
+                balance=account.balance
+            )
 
         except SQLAlchemyError:
             self.db.rollback()
