@@ -1,6 +1,6 @@
 from fastapi import APIRouter,Depends,HTTPException
 from sqlalchemy.orm import Session
-from app.schemas.users import UserCreate, UserResponse, UserLogin
+from app.schemas.users import UserCreate, UserResponse, UserLogin, UserWithAccountResponse
 from app.db.base import get_db
 from app.auth.users import get_password_hash, authenticate_user, ACCESS_TOKEN_EXPIRE_MINUTES,create_user_token
 from typing import Annotated
@@ -10,12 +10,11 @@ from app.services.user_service import UserService
 
 router = APIRouter()
 
-@router.post("/create", response_model=UserResponse)
+@router.post("/create", response_model=UserWithAccountResponse)
 def register_user(db:Annotated[Session,Depends(get_db)],user:UserCreate):
     user_service = UserService(db)
-    new_user = user_service.create_user(user)
-    return UserResponse.model_validate(new_user)
-    
+    new_user = user_service.create_user(user,return_account=True)
+    return new_user    
 
 
 

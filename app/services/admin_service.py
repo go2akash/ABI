@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+from app.auth.admin import get_hashed_admin_password
 from app.models.admin import Admin 
 from app.schemas.admin import AdminShow,AdminCreate
 from app.models.users import User
@@ -19,7 +20,7 @@ class AdminService:
         new_admin=Admin(
             email=data.email,
             name=data.name,
-            password=data.password,
+            password=get_hashed_admin_password(data.password),
             username=data.username
         )
         try:

@@ -10,7 +10,7 @@ from app.schemas.admin import (
     #AccountDetailResponse, 
     #TransactionDetailResponse
 )
-from app.schemas.users import UserCreate
+from app.schemas.users import UserCreate, UserResponse, UserWithAccountResponse
 from app.services.admin_service import AdminService
 from app.auth.admin import get_current_admin, create_admin_token, authenticate_admin
 from app.schemas.token import AdminToken
@@ -37,7 +37,7 @@ def login_admin(
     db: Annotated[Session, Depends(get_db)],
     login_data: AdminLogin
 ):
-    admin = authenticate_admin(db, login_data.password, login_data.username)
+    admin = authenticate_admin(db, login_data.password, login_data.username,login_data.email)
     if not admin:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -75,7 +75,7 @@ def get_user_details(
     return service.get_user_by_id(user_id)
 
 
-@router.post("/users", response_model=UserDetailResponse)
+@router.post("/users", response_model=UserWithAccountResponse)
 def create_user_as_admin(
     user_data: UserCreate,
     db: Annotated[Session, Depends(get_db)],
@@ -85,7 +85,7 @@ def create_user_as_admin(
     Create a new user account (admin privilege)
     """
     service = AdminService(db)
-    return service.create_user(user_data)
+    return service.create_user(user_data,return_account=True)
 '''
 # 💳 TRANSACTION MANAGEMENT
 @router.get("/transactions", response_model=List[TransactionDetailResponse])

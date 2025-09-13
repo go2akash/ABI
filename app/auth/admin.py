@@ -48,7 +48,7 @@ def get_admin(db:Session,username:str |None,email:str|None):
 
 
 def authenticate_admin(db:Session,password:str,username:str|None=None,email:str|None=None):
-    if not username or not email:
+    if not username and not email:
         return False
     admin=get_admin(db,username,email)
     if not admin:
