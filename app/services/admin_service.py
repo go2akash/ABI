@@ -2,11 +2,12 @@ from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from app.auth.admin import get_hashed_admin_password
+from app.models.accounts import Account
 from app.models.admin import Admin 
 from app.schemas.admin import AdminShow,AdminCreate
 from app.models.users import User
 from app.services.user_service import UserService
-
+from app.services.transaction_service import BankTransaction
 
 
 class AdminService:
@@ -44,3 +45,34 @@ class AdminService:
     def create_user(self, user_data):
         user_service = UserService(self.db)
         return user_service.create_user(user_data)
+    
+    def get_all_accounts(self):
+        accounts=self.db.query(Account).all()
+        if not accounts:
+            raise HTTPException(status_code=404,detail="There is no accounts")
+        return accounts
+
+
+    def deopsit_to_account(self,account_number:int,amount:float):
+        reciever_account=self.db.query(Account).filter(Account.account_number==account_number).first()
+        if not reciever_account:
+            raise HTTPException(status_code=404,detail="Account number not find")
+        try:
+            reciever_account.balance+=amount
+            new_tx= BankTransaction(
+                    account_id=reciever_account.id,
+                    amount=amount,
+                    type="deposit",
+                    status="completed"
+
+                )
+            self.db.add_all([reciever_account,new_tx])
+            self.db.commit()
+            self.db.refresh(new_tx)
+            return new_tx
+        except Exception:
+            self.db.rollback()
+            raise HTTPException(status_code=500, detail="Transaction failed")
+ 
+
+

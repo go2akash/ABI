@@ -8,12 +8,15 @@ from app.schemas.admin import (
     AdminLogin,
     UserDetailResponse,
 )
+from app.schemas.transactions import DepositForm
 from app.schemas.users import UserCreate, UserWithAccountResponse
 from app.services.admin_service import AdminService
 from app.auth.admin import get_current_admin, create_admin_token, authenticate_admin
 from app.schemas.token import AdminToken
 from app.models.admin import Admin
 from uuid import UUID
+
+from app.services.transaction_service import TransactionService
 
 router = APIRouter(tags=["Admin"], prefix="/admin")
 
@@ -84,6 +87,18 @@ def create_user_as_admin(
     """
     service = AdminService(db)
     return service.create_user(user_data)
+
+@router.get("/accounts")
+def get_account_details(
+    db:Annotated[Session,Depends(get_db)],
+    current_admin:Annotated[Admin,Depends(get_current_admin)]
+):
+    service=AdminService(db)
+    return service.get_all_accounts()
+@router.post("/deposit")
+def deposit_to_account(db:Annotated[Session,Depends(get_db)],current_admin:Annotated[Admin,Depends(get_current_admin)],depositor_details:DepositForm):
+    service=AdminService(db)
+    return service.deopsit_to_account(depositor_details.receiver_account_number,depositor_details.amount)
 '''
 # 💳 TRANSACTION MANAGEMENT
 @router.get("/transactions", response_model=List[TransactionDetailResponse])

@@ -1,7 +1,3 @@
-
-from threading import active_count
-from typing import Annotated
-
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.models.transactions import BankTransaction
@@ -44,3 +40,30 @@ class TransactionService:
         except Exception:
             self.db.rollback()
             raise HTTPException(status_code=500, detail="Transaction failed")
+
+
+
+    def deopsit_to_account(self,account_number:int,amount:float):
+        reciever_account=self.db.query(Account).filter(Account.account_number==account_number).first()
+        if not reciever_account:
+            raise HTTPException(status_code=404,detail="Account number not find")
+        try:
+            reciever_account.balance+=amount
+            new_tx= BankTransaction(
+                    account_id=reciever_account.id,
+                    amount=amount,
+                    type="deposit",
+                    status="completed"
+
+                )
+            self.db.add_all([reciever_account,new_tx])
+            self.db.commit()
+            self.db.refresh(new_tx)
+            return new_tx
+        except Exception:
+            self.db.rollback()
+            raise HTTPException(status_code=500, detail="Transaction failed")
+ 
+
+
+

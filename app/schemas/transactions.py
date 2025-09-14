@@ -17,4 +17,5 @@ class TransferForm(BaseModel):
     account_type:str="savings"
 
 
-    
+class DepositForm(TransferForm):
+    pass
