@@ -18,27 +18,35 @@ class AccountService:
         Generate a unique 10-digit account number.
         Retry if collision occurs.
         """
-        for _ in range(10):  
+        for _ in range(10):
             number = random.randint(10**9, 10**10 - 1)
-            exists = self.db.query(Account).filter(Account.account_number == number).first()
+            exists = (
+                self.db.query(Account).filter(Account.account_number == number).first()
+            )
             if not exists:
                 return number
-        raise HTTPException(status_code=500, detail="Failed to generate unique account number")
+        raise HTTPException(
+            status_code=500, detail="Failed to generate unique account number"
+        )
 
-    def create_account_for_user(self, user: User, account_type: str = "savings") -> Account:
+    def create_account_for_user(
+        self, user: User, account_type: str = "savings"
+    ) -> Account:
         """
         Create a new account for the user.
         """
         account_type = account_type.lower()
         if account_type not in self.VALID_ACCOUNT_TYPES:
-            raise HTTPException(status_code=400, detail=f"Invalid account type '{account_type}'")
+            raise HTTPException(
+                status_code=400, detail=f"Invalid account type '{account_type}'"
+            )
 
         account_number = self._generate_account_number()
         new_account = Account(
             user_id=user.id,
             account_number=account_number,
             account_type=account_type,
-            balance=0.0
+            balance=0.0,
         )
 
         self.db.add(new_account)

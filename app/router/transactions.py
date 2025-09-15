@@ -8,8 +8,7 @@ from app.schemas.transactions import TransactionResponse, TransferForm
 from app.services.transaction_service import TransactionService
 
 
-
-router=APIRouter()
+router = APIRouter()
 
 
 @router.post("/transfers", response_model=TransactionResponse)
@@ -24,7 +23,7 @@ def send_to_account(
     return TransactionResponse(
         amount=tx.amount,
         type=tx.type,
-        created_at=tx.created_at.isoformat(),   # ← string for JSON
-        account=tx.account.account_number,      # ← relationship magic
+        created_at=tx.created_at.isoformat(),  # ← string for JSON
+        account=tx.account.account_number,  # ← relationship magic
         status=tx.status,
-    ) 
+    )

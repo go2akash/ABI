@@ -13,7 +13,6 @@ from app.schemas.users import UserLogin
 from uuid import UUID
 
 
-
 # openssl rand -hex 32
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
@@ -28,8 +27,10 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 def get_password_hash(password):
     return pwd_context.hash(password)
 
+
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
+
 
 def create_user_token(*, user_id: UUID, expires_delta: timedelta | None = None):
     now = datetime.now(timezone.utc)
@@ -41,8 +42,9 @@ def create_user_token(*, user_id: UUID, expires_delta: timedelta | None = None):
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 
-def get_user_by_id(db:Session, user_id: UUID):
+def get_user_by_id(db: Session, user_id: UUID):
     return db.query(User).filter(User.id == user_id).first()
+
 
 def authenticate_user(db: Session, user_data: UserLogin):
     user = (
@@ -57,7 +59,10 @@ def authenticate_user(db: Session, user_data: UserLogin):
     return user
 
 
-def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Annotated[Session, Depends(get_db)]):
+def get_current_user(
+    token: Annotated[str, Depends(oauth2_scheme)],
+    db: Annotated[Session, Depends(get_db)],
+):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -68,8 +73,8 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Annotate
         user_id_in_str = payload.get("sub")
         if user_id_in_str is None:
             raise credentials_exception
-        user_id=UUID(user_id_in_str)
-    except (InvalidTokenError,ValueError):
+        user_id = UUID(user_id_in_str)
+    except (InvalidTokenError, ValueError):
         raise credentials_exception
     user = get_user_by_id(db, user_id)
     if user is None:

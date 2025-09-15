@@ -1,8 +1,7 @@
-from pydantic import BaseModel, ConfigDict,Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class TransactionResponse(BaseModel):
-    
     amount: float
     type: str
     created_at: str
@@ -13,8 +12,8 @@ class TransactionResponse(BaseModel):
 
 class TransferForm(BaseModel):
     receiver_account_number: int
-    amount:float=Field(ge=0)
-    account_type:str="savings"
+    amount: float = Field(ge=0)
+    account_type: str = "savings"
 
 
 class DepositForm(TransferForm):

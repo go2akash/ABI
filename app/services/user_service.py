@@ -6,9 +6,16 @@ from fastapi import HTTPException
 from app.models import accounts
 from app.models.users import User
 from app.auth.users import get_password_hash
-from app.schemas.users import UserCreate, UserResponse, UserUpdateForm, UserWithAccountResponse,UserUpdateResponse
+from app.schemas.users import (
+    UserCreate,
+    UserResponse,
+    UserUpdateForm,
+    UserWithAccountResponse,
+    UserUpdateResponse,
+)
 from .account_service import AccountService
 from sqlalchemy.orm import joinedload
+
 
 class UserService:
     def __init__(self, db: Session):
@@ -16,8 +23,14 @@ class UserService:
         self.account_service = AccountService(db)
 
     def create_user(self, user: UserCreate):
-        if self.db.query(User).filter((User.username == user.username) | (User.email == user.email)).first():
-            raise HTTPException(status_code=409, detail="Username or email already exists")
+        if (
+            self.db.query(User)
+            .filter((User.username == user.username) | (User.email == user.email))
+            .first()
+        ):
+            raise HTTPException(
+                status_code=409, detail="Username or email already exists"
+            )
 
         hashed_password = get_password_hash(user.password)
 
@@ -26,7 +39,7 @@ class UserService:
             email=user.email,
             full_name=user.full_name,
             hashed_password=hashed_password,
-            is_active=user.is_active
+            is_active=user.is_active,
         )
 
         try:
@@ -35,13 +48,12 @@ class UserService:
 
             # Create first account
             account = self.account_service.create_account_for_user(
-                new_user,
-                account_type=user.account_type
+                new_user, account_type=user.account_type
             )
 
             self.db.commit()
             self.db.refresh(new_user)
-            
+
             return UserWithAccountResponse(
                 id=new_user.id,
                 username=new_user.username,
@@ -52,39 +64,49 @@ class UserService:
                 updated_at=new_user.updated_at,
                 account_number=account.account_number,
                 account_type=account.account_type,
-                balance=account.balance
+                balance=account.balance,
             )
 
         except SQLAlchemyError:
             self.db.rollback()
-            raise HTTPException(status_code=400, detail="Failed to create user or account")
+            raise HTTPException(
+                status_code=400, detail="Failed to create user or account"
+            )
 
-    def get_current_user_details(self,user_id:UUID):
-        user=self.db.query(User).options(joinedload(User.accounts)).filter(User.id==user_id).first()
+    def get_current_user_details(self, user_id: UUID):
+        user = (
+            self.db.query(User)
+            .options(joinedload(User.accounts))
+            .filter(User.id == user_id)
+            .first()
+        )
         if not user:
-            raise HTTPException(status_code=404,detail="user not found")
+            raise HTTPException(status_code=404, detail="user not found")
         if not user.accounts:
-            raise HTTPException(status_code=404,detail="no account details found for the current user")
-        account=user.accounts[0]   #$RElationship between user and account is one to manny and return list
+            raise HTTPException(
+                status_code=404, detail="no account details found for the current user"
+            )
+        account = user.accounts[
+            0
+        ]  # $RElationship between user and account is one to manny and return list
 
         return UserWithAccountResponse(
-                id=user.id,
-                username=user.username,
-                email=user.email,
-                full_name=user.full_name,
-                is_active=user.is_active,
-                created_at=user.created_at,
-                updated_at=user.updated_at,
-                account_number=account.account_number,
-                account_type=account.account_type,
-                balance=account.balance
- 
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            full_name=user.full_name,
+            is_active=user.is_active,
+            created_at=user.created_at,
+            updated_at=user.updated_at,
+            account_number=account.account_number,
+            account_type=account.account_type,
+            balance=account.balance,
         )
 
-    def update_user_details(self,user_data:UserUpdateForm,user_id:UUID):
-        user=self.db.query(User).filter(User.id==user_id).first()
+    def update_user_details(self, user_data: UserUpdateForm, user_id: UUID):
+        user = self.db.query(User).filter(User.id == user_id).first()
         if not user:
-            raise HTTPException(status_code=404,detail="user is not found")
+            raise HTTPException(status_code=404, detail="user is not found")
         updated_fields = {}
 
         if user_data.full_name is not None:
@@ -104,7 +126,6 @@ class UserService:
 
         self.db.commit()
         self.db.refresh(user)
-        return UserUpdateResponse(message=f"user is updated successfully",updated_field=updated_fields) 
-
-    
-
+        return UserUpdateResponse(
+            message=f"user is updated successfully", updated_field=updated_fields
+        )

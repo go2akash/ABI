@@ -1,29 +1,31 @@
 from uuid import UUID
-from pydantic import BaseModel, EmailStr,ConfigDict,model_validator
+from pydantic import BaseModel, EmailStr, ConfigDict, model_validator
 from typing import Optional
 
 
 class AdminCreate(BaseModel):
-    username:str
-    email:EmailStr
-    password:str
-    name:str
+    username: str
+    email: EmailStr
+    password: str
+    name: str
 
 
 class AdminShow(BaseModel):
-    name:str
-    username:str
-    email:EmailStr
+    name: str
+    username: str
+    email: EmailStr
     model_config = ConfigDict(from_attributes=True)
+
 
 class AdminLogin(BaseModel):
     username: Optional[str] = None
     email: Optional[EmailStr] = None
     password: str
-    @model_validator(mode='after')
+
+    @model_validator(mode="after")
     def check_username_or_email(self):
         if not self.username and not self.email:
-            raise ValueError('Either username or email must be provided')
+            raise ValueError("Either username or email must be provided")
         return self
 
 
@@ -36,13 +38,14 @@ class UserDetailResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class DashboardResponse(BaseModel):
-    total_users:int
-    total_accounts:int
-    total_transactions:int
-    total_account_balance:float
+    total_users: int
+    total_accounts: int
+    total_transactions: int
+    total_account_balance: float
 
 
-#UserDetailResponse,
-#AccountDetailResponse, 
-#TransactionDetailResponse
+# UserDetailResponse,
+# AccountDetailResponse,
+# TransactionDetailResponse

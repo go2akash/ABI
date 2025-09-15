@@ -1,7 +1,8 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from uuid import UUID
-from typing import Dict, Optional,Any
+from typing import Dict, Optional, Any
 from datetime import datetime
+
 
 class UserBase(BaseModel):
     email: EmailStr
@@ -14,11 +15,13 @@ class UserCreate(UserBase):
     is_active: bool = True
     account_type: str = "savings"  # Default account type
 
+
 class UserUpdateForm(BaseModel):
     email: Optional[EmailStr]
     full_name: Optional[str]
     username: Optional[str]
     password: Optional[str] = Field(None, min_length=8, max_length=100)
+
 
 class UserResponse(UserBase):
     username: str
@@ -29,9 +32,10 @@ class UserResponse(UserBase):
     updated_at: Optional[datetime]
     model_config = ConfigDict(from_attributes=True)
 
+
 class UserLogin(BaseModel):
-    email: Optional[EmailStr]=None
-    username: Optional[str]=None
+    email: Optional[EmailStr] = None
+    username: Optional[str] = None
     password: str
 
 
@@ -51,11 +55,5 @@ class UserWithAccountResponse(BaseModel):
 
 
 class UserUpdateResponse(BaseModel):
-    message:str
-    updated_field:Dict[str,Any]
-
-
-
-
-
-
+    message: str
+    updated_field: Dict[str, Any]
