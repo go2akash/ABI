@@ -1,7 +1,6 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from uuid import UUID
-from typing import Optional
-from enum import Enum
+from typing import Dict, Optional,Any
 from datetime import datetime
 
 class UserBase(BaseModel):
@@ -15,13 +14,11 @@ class UserCreate(UserBase):
     is_active: bool = True
     account_type: str = "savings"  # Default account type
 
-class UserUpdate(BaseModel):
+class UserUpdateForm(BaseModel):
     email: Optional[EmailStr]
     full_name: Optional[str]
     username: Optional[str]
     password: Optional[str] = Field(None, min_length=8, max_length=100)
-    is_active: Optional[bool] = None
-
 
 class UserResponse(UserBase):
     username: str
@@ -51,3 +48,14 @@ class UserWithAccountResponse(BaseModel):
     balance: float
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserUpdateResponse(BaseModel):
+    message:str
+    updated_field:Dict[str,Any]
+
+
+
+
+
+
