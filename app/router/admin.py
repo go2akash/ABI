@@ -1,11 +1,13 @@
 from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.openapi.models import Server
 from sqlalchemy.orm import Session
 from app.db.base import get_db
 from app.schemas.admin import (
     AdminCreate, 
     AdminShow, 
     AdminLogin,
+    DashboardResponse,
     UserDetailResponse,
 )
 from app.schemas.transactions import DepositForm
@@ -99,6 +101,11 @@ def get_account_details(
 def deposit_to_account(db:Annotated[Session,Depends(get_db)],current_admin:Annotated[Admin,Depends(get_current_admin)],depositor_details:DepositForm):
     service=AdminService(db)
     return service.deopsit_to_account(depositor_details.receiver_account_number,depositor_details.amount)
+
+@router.get("/dashboard",response_model=DashboardResponse)
+def dashboard(db:Annotated[Session,Depends(get_db)],current_admin:Annotated[Admin,Depends(get_current_admin)]):
+    service=AdminService(db)
+    return service.dashboard()
 '''
 # 💳 TRANSACTION MANAGEMENT
 @router.get("/transactions", response_model=List[TransactionDetailResponse])

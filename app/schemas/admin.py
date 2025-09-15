@@ -36,7 +36,11 @@ class UserDetailResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-
+class DashboardResponse(BaseModel):
+    total_users:int
+    total_accounts:int
+    total_transactions:int
+    total_account_balance:float
 
 
 #UserDetailResponse,

@@ -1,10 +1,11 @@
 from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import func
 from app.auth.admin import get_hashed_admin_password
 from app.models.accounts import Account
 from app.models.admin import Admin 
-from app.schemas.admin import AdminShow,AdminCreate
+from app.schemas.admin import AdminShow,AdminCreate, DashboardResponse
 from app.models.users import User
 from app.services.user_service import UserService
 from app.services.transaction_service import BankTransaction
@@ -75,4 +76,16 @@ class AdminService:
             raise HTTPException(status_code=500, detail="Transaction failed")
  
 
+    def dashboard(self):
+        total_users = self.db.query(func.count(User.id)).scalar()
+        total_accounts = self.db.query(func.count(Account.id)).scalar()
+        total_transactions = self.db.query(func.count(BankTransaction.id)).scalar()
+        total_account_balance = self.db.query(func.coalesce(func.sum(Account.balance), 0)).scalar()
+
+        return DashboardResponse(
+            total_users=total_users,
+            total_accounts=total_accounts,
+            total_transactions=total_transactions,
+            total_account_balance=total_account_balance
+        )
 
