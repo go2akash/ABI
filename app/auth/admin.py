@@ -22,7 +22,7 @@ from app.models.admin import Admin
 load_dotenv()
 
 
-ADMIN_SECRET_KEY = os.getenv("ADMIN_SECRATE_KEY")
+ADMIN_SECRET_KEY = os.getenv("ADMIN_SECRET_KEY")
 if not ADMIN_SECRET_KEY:
     raise HTTPException(status_code=404, detail="Missing secrate key")
 ALGORITHM = "HS256"
